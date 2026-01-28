@@ -1,0 +1,19 @@
+services:
+  sso-service:
+    image: sso-service:v1.0
+    container_name: sso_service_container
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "${PORT}:${PORT}" # Passes the .env PORT to docker PORT
+    networks:
+      - internal_db_network
+    
+    # will overwrite the same variables found in your .env file
+    environment:
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+networks:
+  internal_db_network:
+    external: true
