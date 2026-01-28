@@ -3,6 +3,9 @@ services:
     image: sso-service:v1.0
     container_name: sso_service_container
     build: .
+    volumes:
+      - .:/usr/src/app            # Sync your local code to the container
+      - /usr/src/app/node_modules # Prevent local node_modules from overwriting container's
     env_file:
       - .env
     ports:

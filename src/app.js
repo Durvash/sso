@@ -1,8 +1,8 @@
 const express = require('express');
-// const authRoutes = require('./routes/authRoutes');
+const routes = require('./routes');
 const app = express();
 
 app.use(express.json());
-// app.use('/api/auth', authRoutes);
+app.use('/api/v1', routes);
 
-module.exports = app; // Export the app without starting it
+module.exports = app;
