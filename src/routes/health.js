@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../config/db');
+const db = require('../config/db');
 const redisClient = require('../config/redis');
 
 router.get('/', async (req, res) => {
@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
 
   try {
     // 1. Check PostgreSQL (Simple "SELECT 1" query)
-    await pool.query('SELECT 1');
+    await db.query('SELECT 1');
     healthcheck.checks.database = 'UP';
 
     // 2. Check Redis (Check if client is ready)
