@@ -4,12 +4,12 @@ const authModel = require('./auth.model');
 
 const auth = {
   signup,
-  login
-}
+  login,
+};
 
 async function signup(req, res) {
   try {
-    const { fullname, email, password } = req.body;
+    const { email, password } = req.body;
 
     // Check email aleady exist or not
     const [user, userError] = await authModel.finduserByEmail(email);
@@ -18,7 +18,10 @@ async function signup(req, res) {
     }
 
     if (user.length > 0) {
-      throw new Error('Email already exist!');
+      return res.status(400).json({
+        success: false,
+        message: 'Email already exist!',
+      });
     }
 
     // Generate password hash
@@ -52,22 +55,50 @@ async function login(req, res) {
   try {
     const { email, password } = req.body;
 
-    // Check email aleady exist or not
+    // Get user detail by email
     const [user, userError] = await authModel.finduserByEmail(email);
     if (userError) {
       throw new Error(userError);
     }
 
     if (user.length === 0) {
-      throw new Error('Invalid email or password!');
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password.',
+      });
     }
-    
+
+    // Compare Hashed Password
+    const isMatch = await bcrypt.compare(password, user[0]?.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password.',
+      });
+    }
+
+    // Get User detail to store in session
+    const [userData, userDataError] = await authModel.getUserById(user[0]?.id);
+    if (userDataError) {
+      throw new Error(userDataError);
+    }
+
+    const loginData = Array.isArray(userData) ? userData[0] : userData;
+
+    // Remove password before sending user data
+    delete loginData?.password_hash;
+
+    // Generate JWT token
+    const token = jwt.sign(loginData, process.env.JWT_SECRET, {
+      expiresIn: '24h',
+    });
+
     res.status(200).json({
       success: true,
-      data: [],
-      token: null
-    })
-
+      message: 'Loggin successful.',
+      data: loginData,
+      token: token,
+    });
   } catch (e) {
     res.status(500).json({
       success: false,

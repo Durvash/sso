@@ -23,7 +23,7 @@ const schemas = {
   // SIGNUP
   signupSchema: {
     body: Joi.object({
-      fullname: Joi.string()
+      full_name: Joi.string()
         .min(3)
         .max(50)
         .pattern(/^[a-zA-Z\s]+$/)
