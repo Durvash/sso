@@ -1,8 +1,9 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const authModel = require('./auth.model');
+const redisClient = require('../../config/redis');
 
-const auth = {
+const authController = {
   signup,
   login,
 };
@@ -88,6 +89,12 @@ async function login(req, res) {
     // Remove password before sending user data
     delete loginData?.password_hash;
 
+    // Store in Redis with 24-hour expiry
+    const redisKey = `session:${loginData.id}`;
+    await redisClient.set(redisKey, JSON.stringify(loginData), {
+      EX: 24 * 60 * 60, // 24 hours in seconds
+    });
+
     // Generate JWT token
     const token = jwt.sign(loginData, process.env.JWT_SECRET, {
       expiresIn: '24h',
@@ -108,4 +115,4 @@ async function login(req, res) {
   }
 }
 
-module.exports = auth;
+module.exports = authController;
