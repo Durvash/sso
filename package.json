@@ -8,10 +8,11 @@
     "dev": "nodemon src/index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Durvas Nimje",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "amqplib": "^0.10.9",
     "bcrypt": "^6.0.0",
     "crypto": "^1.0.1",
     "dotenv": "^17.2.3",

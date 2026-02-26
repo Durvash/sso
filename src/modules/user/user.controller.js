@@ -1,5 +1,6 @@
 const userModel = require('./user.model');
 const { generateToken } = require('../../helpers/general');
+const rabbitClient = require('../../utils/rabbit.util');
 
 const userController = {
   addcompany,
@@ -73,6 +74,20 @@ async function inviteUsers(req, res) {
     const [invitation, invitationError] = await userModel.addInvitation({company_id: company_id, emails: emailArr, token: token});
     if (invitationError) {
       throw new Error(invitationError);
+    }
+    
+    // Send email to users for inviting
+    for (const email of emailArr) {
+      console.log('============== DEBUG START 🚀 ==============');
+      console.log('File: user.controller.js | Line: 81');
+      console.log(email);
+      console.log(rabbitClient);
+      console.log('============== DEBUG END ==============');
+      rabbitClient.publishNotification('notification.sso.invite', {
+        type: 'USER_INVITATION',
+        recipient: email,
+        content: { token: token, url: `http://localhost:${process.env.PORT}/join/${email}/${token}` }
+      });
     }
     
     res.status(200).json({

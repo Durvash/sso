@@ -20,3 +20,5 @@ services:
 networks:
   internal_db_network:
     external: true
+  notification-service_default:
+    external: true
