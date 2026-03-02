@@ -1,4 +1,5 @@
 const amqp = require('amqplib');
+require('dotenv').config();
 
 class RabbitMQClient {
   constructor() {
@@ -10,7 +11,7 @@ class RabbitMQClient {
   async initialize() {
     if (this.channel) return; // Prevent multiple connection attempts
     try {
-      const url = process.env.RABBITMQ_URL || 'amqp://admin:admin321@rabbitmq:5672';
+      const url = process.env.RABBITMQ_URL;
       this.connection = await amqp.connect(url);
       this.channel = await this.connection.createChannel();
       await this.channel.assertExchange(this.exchange, 'topic', { durable: true });

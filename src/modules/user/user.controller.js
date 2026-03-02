@@ -39,7 +39,7 @@ async function inviteUsers(req, res) {
     if (user_role !== 'Admin') {
       return res.status(403).json({
         success: false,
-        message: 'Access denied!',
+        message: 'You have no access to invite users.',
       });
     }
 
@@ -78,11 +78,6 @@ async function inviteUsers(req, res) {
     
     // Send email to users for inviting
     for (const email of emailArr) {
-      console.log('============== DEBUG START 🚀 ==============');
-      console.log('File: user.controller.js | Line: 81');
-      console.log(email);
-      console.log(rabbitClient);
-      console.log('============== DEBUG END ==============');
       rabbitClient.publishNotification('notification.sso.invite', {
         type: 'USER_INVITATION',
         recipient: email,

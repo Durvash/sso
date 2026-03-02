@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 const redisClient = require('../config/redis');
+const rabbitmq = require('../config/rabbitmq');
 
 router.get('/', async (req, res) => {
   const healthcheck = {
@@ -10,7 +11,8 @@ router.get('/', async (req, res) => {
     timestamp: Date.now(),
     checks: {
       database: 'DOWN',
-      redis: 'DOWN'
+      redis: 'DOWN',
+      rabbitMQ: 'DOWN'
     }
   };
 
@@ -24,8 +26,13 @@ router.get('/', async (req, res) => {
       healthcheck.checks.redis = 'UP';
     }
 
+    // 3. Check rabbitMQ
+    if (rabbitmq.connectRabbitMQ) {
+      healthcheck.checks.rabbitMQ = 'UP';
+    }
+
     // If both are UP, send 200, otherwise send 503 (Service Unavailable)
-    const isHealthy = healthcheck.checks.database === 'UP' && healthcheck.checks.redis === 'UP';
+    const isHealthy = healthcheck.checks.database === 'UP' && healthcheck.checks.redis === 'UP' && healthcheck.checks.rabbitMQ === 'UP';
     res.status(isHealthy ? 200 : 503).json(healthcheck);
 
   } catch (error) {
