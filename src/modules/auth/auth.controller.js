@@ -6,6 +6,7 @@ const redisClient = require('../../config/redis');
 const authController = {
   signup,
   login,
+  joinUser,
 };
 
 async function signup(req, res) {
@@ -110,6 +111,63 @@ async function login(req, res) {
     res.status(500).json({
       success: false,
       message: 'Login failed, please try again!',
+      stack: e.message,
+    });
+  }
+}
+
+async function joinUser(req, res) {
+  try {
+    const { fullname, email, password, token } = req.body;
+
+    // Check token is valid or not
+    const [invitation, invitationError] = await authModel.invitationVerify(email, token);
+    if (invitationError) {
+      throw new Error(invitationError);
+    }
+
+    if (invitation.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token is invalid or expired!',
+      });
+    }
+
+    // Check email aleady exist or not
+    const [user, userError] = await authModel.finduserByEmail(email);
+    if (userError) {
+      throw new Error(userError);
+    }
+
+    if (user.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email already exist!',
+      });
+    }
+
+    // Generate password hash
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Insert user data to signup
+    const [newUser, newUserError] = await authModel.insertUser({
+      ...req.body,
+      password: hashedPassword,
+    });
+    if (newUserError) {
+      throw new Error(newUserError);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Joining Successfully.',
+      data: newUser,
+    });
+  } catch (e) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to Joining, please try again!',
       stack: e.message,
     });
   }

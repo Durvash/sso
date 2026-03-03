@@ -4,6 +4,7 @@ const authModel = {
   finduserByEmail,
   getUserById,
   insertUser,
+  invitationVerify,
 };
 
 async function finduserByEmail(email) {
@@ -33,6 +34,17 @@ async function insertUser(data) {
     const { fullname, email, password } = data;
     const query = 'INSERT INTO users (fullname, email, password_hash) VALUES ($1, $2, $3) RETURNING id';
     const values = [fullname, email, password];
+    const result = await db.query(query, values);
+    return [result?.rows, null];
+  } catch (e) {
+    return [null, e];
+  }
+}
+
+async function invitationVerify(email, token) {
+  try {
+    const query = 'SELECT * FROM invitations WHERE email = $1 AND token = $2 AND expires_at > now()';
+    const values = [email, token];
     const result = await db.query(query, values);
     return [result?.rows, null];
   } catch (e) {

@@ -81,7 +81,7 @@ async function inviteUsers(req, res) {
       rabbitClient.publishNotification('notification.sso.invite', {
         type: 'USER_INVITATION',
         recipient: email,
-        content: { token: token, url: `http://localhost:${process.env.PORT}/join/${email}/${token}` }
+        content: { token: token, url: `http://localhost:${process.env.PORT}/api/v1/user/join/${email}/${token}` }
       });
     }
     

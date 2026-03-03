@@ -75,6 +75,27 @@ const schemas = {
       new_password: password,
     }),
   },
+  // JOIN USER
+  joinSchema: {
+    body: Joi.object({
+      fullname: Joi.string()
+        .min(3)
+        .max(50)
+        .pattern(/^[a-zA-Z\s]+$/)
+        .required()
+        .messages({
+          'string.pattern.base':
+            'Full name should only contain letters and spaces.',
+          'string.empty': 'Full name is required.',
+          'string.min': 'Full name must be at least 3 characters long.',
+          'string.max': 'Full name must be upto 50 characters long.',
+          'any.required': 'Full name is required.',
+        }),
+      email: email,
+      password: password,
+      token: Joi.string().required(),
+    }),
+  },
 };
 
 module.exports = schemas;
