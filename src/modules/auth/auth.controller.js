@@ -151,7 +151,7 @@ async function joinUser(req, res) {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Insert user data to signup
-    const [newUser, newUserError] = await authModel.insertUser({
+    const [newUser, newUserError] = await authModel.addJoinUser({
       ...req.body,
       password: hashedPassword,
     });

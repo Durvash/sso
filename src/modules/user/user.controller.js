@@ -1,6 +1,7 @@
 const userModel = require('./user.model');
 const { generateToken } = require('../../helpers/general');
 const rabbitClient = require('../../utils/rabbit.util');
+const redisClient = require('../../config/redis');
 
 const userController = {
   addcompany,
@@ -17,6 +18,25 @@ async function addcompany(req, res) {
       throw new Error(newCompanyError);
     }
 
+    // Get user data with company detail, so update the session to accesss user invitation module
+    const [user, userError] = await userModel.getUserById(req.user?.id);
+    if (userError) {
+      throw new Error(userError);
+    }
+
+    // Update the session data
+    const redisKey = `session:${req.user?.id}`;
+    const loginDataRaw = await redisClient.get(redisKey);
+    const loginData = loginDataRaw ? JSON.parse(loginDataRaw) : {};
+    const userData = {
+      ...loginData,
+      user_role: user[0]?.user_role,
+      company_id: user[0]?.company_id
+    }
+    await redisClient.set(redisKey, JSON.stringify(userData), {
+      EX: 24 * 60 * 60, // 24 hours in seconds
+    });
+    
     res.status(200).json({
       success: true,
       message: 'Company has been added successfully.',
