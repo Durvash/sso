@@ -11,6 +11,14 @@ const userController = {
 async function addcompany(req, res) {
   try {
     const { company_name } = req.body;
+    const { user_role } = req.user;
+
+    if (user_role === 'Member') {
+      return res.status(403).json({
+        success: false,
+        message: 'You have no access to create a company.',
+      });
+    }
 
     // Add company data
     const [newCompany, newCompanyError] = await userModel.addcompany(company_name, req.user?.id);
