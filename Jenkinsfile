@@ -73,7 +73,7 @@ pipeline {
 
                 docker run -d \
                     --name sso-app \
-                    -p 5000:5000 \
+                    -p 3000:3000 \
                     --restart always \
                     $IMAGE_URI
                 '''
